@@ -17,12 +17,9 @@
 
 package cs.serving.utils
 
-import java.io.{File, FileInputStream, FileWriter}
-import java.nio.file.{Files, Paths}
-import java.time.LocalDateTime
+import java.io.{File, FileInputStream}
 import java.util.LinkedHashMap
 
-import com.intel.analytics.bigdl.nn.abstractnn.AbstractModule
 import cs.frameworks.tensorflow.TFNet
 import org.apache.log4j.Logger
 import org.yaml.snakeyaml.Yaml

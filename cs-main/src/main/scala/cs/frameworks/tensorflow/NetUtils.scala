@@ -17,7 +17,6 @@ package cs.frameworks.tensorflow
 
 import com.esotericsoftware.kryo.{Kryo, KryoSerializable}
 import com.esotericsoftware.kryo.io.{Input, Output}
-import com.intel.analytics.bigdl.nn.keras.KerasLayer
 import cs.module.Activity
 import cs.module.tensor.Tensor
 import org.slf4j.{Logger, LoggerFactory}

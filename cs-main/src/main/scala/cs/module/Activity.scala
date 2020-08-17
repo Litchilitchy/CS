@@ -52,28 +52,20 @@ object Activity {
       T()
     } else if (classTag[D] == classTag[Tensor[_]]) {
       if (classTag[Boolean] == classTag[T]) {
-        import com.intel.analytics.bigdl.numeric.NumericBoolean
         Tensor[Boolean]()
       } else if (classTag[Char] == classTag[T]) {
-        import com.intel.analytics.bigdl.numeric.NumericChar
         Tensor[Char]()
       } else if (classTag[Short] == classTag[T]) {
-        import com.intel.analytics.bigdl.numeric.NumericShort
         Tensor[Short]()
       } else if (classTag[Int] == classTag[T]) {
-        import com.intel.analytics.bigdl.numeric.NumericInt
         Tensor[Int]()
       } else if (classTag[Long] == classTag[T]) {
-        import com.intel.analytics.bigdl.numeric.NumericLong
         Tensor[Long]()
       } else if (classTag[Float] == classTag[T]) {
-        import com.intel.analytics.bigdl.numeric.NumericFloat
         Tensor[Float]()
       } else if (classTag[Double] == classTag[T]) {
-        import com.intel.analytics.bigdl.numeric.NumericDouble
         Tensor[Double]()
       } else if (classTag[String] == classTag[T]) {
-        import com.intel.analytics.bigdl.numeric.NumericString
         Tensor[String]()
       }else {
         throw new IllegalArgumentException("Type T activity is not supported")

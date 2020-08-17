@@ -16,8 +16,6 @@
 
 package cs.serving.engine
 
-import com.intel.analytics.bigdl.nn.abstractnn.AbstractModule
-import cs.module.Activity
 import cs.module.tensor.Tensor
 import org.apache.flink.api.common.functions.RichMapFunction
 import org.apache.flink.configuration.Configuration

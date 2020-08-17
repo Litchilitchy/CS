@@ -108,7 +108,6 @@
                 <scala.macros.version>2.1.0</scala.macros.version>
                 <bigdl.artifactId>bigdl-SPARK_${spark-version.project}</bigdl.artifactId>
                 <scala-library-scope>compile</scala-library-scope>
-                <spark-scope>compile</spark-scope>
             </properties>
             <dependencies>
                 <dependency>
@@ -254,11 +253,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.9.9</version>
-        </dependency>
-        <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_${scala.major.version}</artifactId>
             <version>${scalatest.version}</version>
@@ -274,13 +268,11 @@
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-compiler</artifactId>
             <version>${scala.version}</version>
-            <scope>${spark-scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-reflect</artifactId>
             <version>${scala.version}</version>
-            <scope>${spark-scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -292,58 +284,22 @@
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-actors</artifactId>
             <version>${scala.version}</version>
-            <scope>${spark-scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scalap</artifactId>
             <version>${scala.version}</version>
-            <scope>${spark-scope}</scope>
         </dependency>
 
-        <!--        <dependency>-->
-        <!--            <groupId>org.apache.spark</groupId>-->
-        <!--            <artifactId>spark-core_${scala.major.version}</artifactId>-->
-        <!--            <version>${spark.version}</version>-->
-        <!--            <scope>${spark-scope}</scope>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor_2.11</artifactId>
             <version>2.5.26</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-scala_2.11</artifactId>
-            <version>2.6.7.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-mllib_${scala.major.version}</artifactId>
-            <version>${spark.version}</version>
-            <scope>${spark-scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.analytics.bigdl</groupId>
-            <artifactId>${bigdl.artifactId}</artifactId>
-            <version>${bigdl.version}</version>
-            <scope>${bigdl-scope}</scope>
-        </dependency>
-        <dependency>
-            <groupId>ml.dmlc</groupId>
-            <artifactId>xgboost4j</artifactId>
-            <version>0.90</version>
-        </dependency>
-        <dependency>
-            <groupId>ml.dmlc</groupId>
-            <artifactId>xgboost4j-spark</artifactId>
-            <version>0.90</version>
-        </dependency>
-        <dependency>
-            <groupId>org.spark-project.spark</groupId>
-            <artifactId>unused</artifactId>
-            <version>1.0.0</version>
-            <scope>compile</scope>
+            <groupId>org.json4s</groupId>
+            <artifactId>json4s-jackson_2.11</artifactId>
+            <version>3.6.7</version>
         </dependency>
         <dependency>
             <groupId>org.tensorflow</groupId>
@@ -426,11 +382,6 @@
             <version>4.1.2</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.10.2</version>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-scala_2.11</artifactId>
             <version>2.10.2</version>
@@ -476,19 +427,16 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-scala_2.11</artifactId>
             <version>1.10.0</version>
-            <scope>${spark-scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-scala_2.11</artifactId>
             <version>1.10.0</version>
-            <scope>${spark-scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients_2.11</artifactId>
             <version>1.10.0</version>
-            <scope>${spark-scope}</scope>
         </dependency>
     </dependencies>
 
@@ -544,48 +492,7 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>build_info</id>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <!-- Execute the shell script to generate the zoo build information. -->
-                            <arguments>
-                                <argument>${project.basedir}/../scripts/zoo-build-info</argument>
-                                <argument>${project.build.directory}/extra-resources</argument>
-                                <argument>${project.version}</argument>
-                                <argument>${spark.version}</argument>
-                                <argument>${scala.version}</argument>
-                                <argument>${java.version}</argument>
-                            </arguments>
 
-                            <executable>bash</executable>
-                        </configuration>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>python_packages</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <arguments>
-                                <argument>${project.basedir}/../scripts/get_python_packages</argument>
-                                <argument>${project.basedir}/python_packages</argument>
-                                <argument>${bigdl.version}</argument>
-                            </arguments>
-
-                            <executable>bash</executable>
-                        </configuration>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.scalatest</groupId>
                 <artifactId>scalatest-maven-plugin</artifactId>
@@ -676,31 +583,6 @@
                     </execution>
 
                     <execution>
-                        <id>without-spark</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
-                            <artifactSet>
-                                <excludes>
-                                    <exclude>org.apache.flink:*</exclude>
-                                    <exclude>org.apache.spark:*</exclude>
-                                    <exclude>org.apache.hadoop:*</exclude>
-                                    <exclude>org.apache.parquet:*</exclude>
-                                    <exclude>org.scala-lang:scala-compiler</exclude>
-                                    <exclude>org.scala-lang:scala-reflect</exclude>
-                                    <exclude>org.scala-lang:scala-library</exclude>
-                                    <exclude>org.scala-lang:scala-actors</exclude>
-                                    <exclude>org.scala-lang:scalap</exclude>
-                                </excludes>
-                            </artifactSet>
-                        </configuration>
-                    </execution>
-
-                    <execution>
                         <id>http</id>
                         <phase>package</phase>
                         <goals>
@@ -766,91 +648,34 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <id>with-spark</id>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/assembly/all-in-one.xml
-                                </descriptor>
-                            </descriptors>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-
-                    <execution>
-                        <id>python</id>
-                        <inherited>false</inherited>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/assembly/python-zip.xml
-                                </descriptor>
-                            </descriptors>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-
-                    <execution>
-                        <id>make-dist</id>
-                        <inherited>false</inherited>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/assembly/dist.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>make-dist-all</id>
-                        <inherited>false</inherited>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/assembly/dist-all.xml
-                                </descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>serving-python</id>
-                        <inherited>false</inherited>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/assembly/cluster-serving-python.xml
-                                </descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>make-cluster-serving-all</id>
-                        <inherited>false</inherited>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/assembly/cluster-serving-all.xml
-                                </descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <id>serving-python</id>-->
+<!--                        <inherited>false</inherited>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>single</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <descriptors>-->
+<!--                                <descriptor>${project.basedir}/src/assembly/cluster-serving-python.xml-->
+<!--                                </descriptor>-->
+<!--                            </descriptors>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>make-cluster-serving-all</id>-->
+<!--                        <inherited>false</inherited>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>single</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <descriptors>-->
+<!--                                <descriptor>${project.basedir}/src/assembly/cluster-serving-all.xml-->
+<!--                                </descriptor>-->
+<!--                            </descriptors>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
                 </executions>
             </plugin>
             <plugin>

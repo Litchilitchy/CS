@@ -16,7 +16,6 @@
 
 package cs.module.tensor
 
-import breeze.linalg.{DenseMatrix, DenseVector}
 import cs.module.tensor.TensorNumericMath.TensorNumeric
 import cs.module.tensor.storage.Storage
 

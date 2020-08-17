@@ -19,7 +19,6 @@ package cs.serving.preprocessing
 import cs.module.Activity
 import com.intel.analytics.bigdl.opencv.OpenCV
 import cs.module.tensor.Tensor
-import com.intel.analytics.bigdl.transform.vision.image.opencv.OpenCVMat
 import cs.module.tensor.T
 import org.apache.log4j.Logger
 import org.opencv.core.{Mat, MatOfByte}
