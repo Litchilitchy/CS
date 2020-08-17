@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package module
+package module.utils
 
-import com.intel.analytics.bigdl.tensor.Tensor
-import com.intel.analytics.bigdl.utils.{File, T, Table}
+import module.tensor.Tensor
+import com.intel.analytics.bigdl.utils.{File}
 import module.tensor.{T, Table, Tensor}
 import org.apache.commons.lang3.SerializationUtils
 
@@ -26,7 +26,7 @@ import scala.reflect.ClassTag
 /**
  * Similar to torch Optim method, which is used to update the parameter
  */
-trait OptimizeMethod[@specialized(Float, Double) T] extends Serializable {
+trait OptimMethod[@specialized(Float, Double) T] extends Serializable {
 
   /**
    * Optimize the model parameter
@@ -68,7 +68,7 @@ trait OptimizeMethod[@specialized(Float, Double) T] extends Serializable {
    *
    * @return
    */
-  override def clone(): OptimizeMethod[T] = SerializationUtils.clone(this)
+  override def clone(): OptimMethod[T] = SerializationUtils.clone(this)
 
   /**
    * get learning rate
@@ -78,7 +78,7 @@ trait OptimizeMethod[@specialized(Float, Double) T] extends Serializable {
   def getLearningRate(): Double
 
   // a table describing the state of the optimizer; after each call the state is modified
-  private[bigdl] var state: Table = T(
+  private var state: Table = T(
     "epoch" -> 1,
     "neval" -> 1
   )
@@ -169,13 +169,13 @@ trait OptimizeMethod[@specialized(Float, Double) T] extends Serializable {
 
 }
 
-object OptimizeMethod {
+object OptimMethod {
   /**
    * load optim method
    * @param path file path
    * @return
    */
-  def load[T: ClassTag](path : String) : OptimizeMethod[T] = {
-    File.load[OptimizeMethod[T]](path)
+  def load[T: ClassTag](path : String) : OptimMethod[T] = {
+    File.load[OptimMethod[T]](path)
   }
 }

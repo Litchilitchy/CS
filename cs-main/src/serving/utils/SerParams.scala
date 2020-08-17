@@ -28,16 +28,10 @@ class SerParams(helper: ClusterServingHelper, loadModel: Boolean = true) extends
 //  val dataShape = helper.dataShape
   val modelType = helper.modelType
   val modelDir = helper.modelDir
-  val lastModified = FileUtils.getLastModified(helper.modelDir)
   val sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
   val redisSecureEnabled = helper.redisSecureEnabled
   val redisSecureTrustStorePath = helper.redisSecureTrustStorePath
   val redisSecureTrustStorePassword = helper.redisSecureTrustStorePassword
-  println(s"loading params, time is ${sdf.format(lastModified)}")
-  var model = if (loadModel) {
-    helper.loadInferenceModel()
-  } else {
-    null
-  }
+  var model = null
   val resize = helper.resize
 }

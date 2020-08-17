@@ -16,10 +16,12 @@
 
 package serving.engine
 
-import com.intel.analytics.bigdl.nn.abstractnn.Activity
-import com.intel.analytics.bigdl.tensor.Tensor
-import com.intel.analytics.bigdl.utils.T
+import module.Activity
+import module.tensor.Tensor
+import module.tensor.T
 import org.apache.log4j.Logger
+import serving.postprocessing.PostProcessing
+import serving.utils.SerParams
 
 object InferenceSupportive {
   val logger = Logger.getLogger(getClass)

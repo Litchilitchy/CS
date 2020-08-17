@@ -18,7 +18,7 @@
 package serving
 
 import serving.engine.{FlinkInference, FlinkRedisSink, FlinkRedisSource}
-import serving.utils.{ClusterServingHelper, SerParams}
+import serving.utils.{ClusterServingHelper, ClusterServingManager, SerParams}
 import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, _}
 import org.apache.log4j.{Level, Logger}
 import scopt.OptionParser

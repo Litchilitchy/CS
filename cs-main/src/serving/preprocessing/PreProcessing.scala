@@ -16,12 +16,16 @@
 
 package serving.preprocessing
 
-import com.intel.analytics.bigdl.nn.abstractnn.Activity
-import com.intel.analytics.bigdl.tensor.Tensor
+import module.Activity
+import com.intel.analytics.bigdl.opencv.OpenCV
+import module.tensor.Tensor
 import com.intel.analytics.bigdl.transform.vision.image.opencv.OpenCVMat
-import com.intel.analytics.bigdl.utils.T
+import module.tensor.T
 import org.apache.log4j.Logger
+import org.opencv.core.{Mat, MatOfByte}
 import org.opencv.imgcodecs.Imgcodecs
+import serving.http.Instances
+import serving.utils.SerParams
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -112,3 +116,35 @@ class PreProcessing(param: SerParams) {
   }
 
 }
+object OpenCVMethod {
+  OpenCV.isOpenCVLoaded
+
+  /**
+   * convert image file in bytes to opencv mat with BGR
+   *
+   * @param fileContent bytes from an image file
+   * @param imageCodec specifying the color type of a loaded image, same as in OpenCV.imread.
+   *              By default is Imgcodecs.CV_LOAD_IMAGE_UNCHANGED
+   * @return opencv mat
+   */
+  def fromImageBytes(fileContent: Array[Byte],
+                     imageCodec: Int = Imgcodecs.CV_LOAD_IMAGE_UNCHANGED): OpenCVMat = {
+    var mat: Mat = null
+    var matOfByte: MatOfByte = null
+    var result: OpenCVMat = null
+    try {
+      matOfByte = new MatOfByte(fileContent: _*)
+      mat = Imgcodecs.imdecode(matOfByte, imageCodec)
+      result = new OpenCVMat(mat)
+    } catch {
+      case e: Exception =>
+        if (null != result) result.release()
+        throw e
+    } finally {
+      if (null != mat) mat.release()
+      if (null != matOfByte) matOfByte.release()
+    }
+    result
+  }
+}
+

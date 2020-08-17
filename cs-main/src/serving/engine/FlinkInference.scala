@@ -16,16 +16,19 @@
 
 package serving.engine
 
-import com.intel.analytics.bigdl.tensor.Tensor
+import com.intel.analytics.bigdl.nn.abstractnn.AbstractModule
+import module.Activity
+import module.tensor.Tensor
 import org.apache.flink.api.common.functions.RichMapFunction
 import org.apache.flink.configuration.Configuration
 import org.apache.log4j.Logger
+import serving.postprocessing.PostProcessing
+import serving.preprocessing.PreProcessing
 import serving.utils.SerParams
 
 
 class FlinkInference(params: SerParams)
   extends RichMapFunction[List[(String, String)], List[(String, String)]] {
-  var model: InferenceModel = null
   var t: Tensor[Float] = null
   var logger: Logger = null
   var inferenceCnt: Int = 0

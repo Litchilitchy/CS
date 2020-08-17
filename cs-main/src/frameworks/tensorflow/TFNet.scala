@@ -13,31 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.intel.analytics.zoo.pipeline.api.net
+package frameworks.tensorflow
 
 import java.io.{File, FileInputStream, InputStream}
-import java.nio._
-
-import com.intel.analytics.bigdl.Module
-import com.intel.analytics.bigdl.dataset.MiniBatch
-import com.intel.analytics.bigdl.models.utils.ModelBroadcast
-import com.intel.analytics.bigdl.nn.abstractnn.{AbstractModule, Activity}
-import com.intel.analytics.bigdl.optim.{ValidationMethod, ValidationResult}
-import com.intel.analytics.bigdl.tensor.Tensor
-import com.intel.analytics.bigdl.tensor.TensorNumericMath.TensorNumeric
-import com.intel.analytics.bigdl.utils.T
-import com.intel.analytics.zoo.common.Utils
 import com.intel.analytics.zoo.core.TFNetNative
-import com.intel.analytics.zoo.pipeline.api.Predictable
-import com.intel.analytics.zoo.pipeline.api.net.TFNet.TFGraphHolder
-import com.intel.analytics.zoo.tfpark.{TFResourceManager, TFUtils}
-import org.apache.spark.rdd.RDD
+import frameworks.Predictable
+import frameworks.tensorflow.TFNet.TFGraphHolder
+import module.tensor.{T, Tensor}
+import module.tensor.TensorNumericMath.TensorNumeric
+import module.{AbstractModule, Activity}
+import org.json4s._
 import org.tensorflow.framework.GraphDef
 import org.tensorflow.{DataType, Graph, Session, Tensor => TTensor}
 
 import scala.collection.JavaConverters._
-import org.json4s._
-
 import scala.collection.mutable
 import scala.reflect.ClassTag
 
@@ -57,15 +46,14 @@ class TFNet(private val graphDef: TFGraphHolder,
             val graphMeta: Meta,
             config: Array[Int])
   extends AbstractModule[Activity, Activity, Float] with Predictable[Float] {
-
-  protected val module: Module[Float] = this
+  
   implicit val ev = TensorNumeric.NumericFloat
   implicit val tag: ClassTag[Float] = ClassTag.Float
 
   @transient
   private lazy val tensorManager = new TFResourceManager()
 
-  private[zoo] def graph = graphDef.tfGraph.graph
+  private def graph = graphDef.tfGraph.graph
 
   val inputNames: Array[String] = graphMeta.inputNames
   private val inputTypes = inputNames.map(name2type)
@@ -159,7 +147,7 @@ class TFNet(private val graphDef: TFGraphHolder,
   }
 
   @transient
-  private[zoo] lazy val sess = {
+  private lazy val sess = {
     val sess = new Session(this.graph, config.map(_.toByte))
     sess
   }
@@ -175,8 +163,6 @@ class TFNet(private val graphDef: TFGraphHolder,
 
   override def updateOutput(input: Activity): Activity = {
     try {
-
-      Utils.timeIt("TFNet.updateOutput") {
         val runner = sess.runner()
 
         require(activityLength(input) == inputTypes.length,
@@ -250,7 +236,7 @@ class TFNet(private val graphDef: TFGraphHolder,
 
           // tempTensors will be cleaned up after backward
         }
-      }
+
     } catch {
       case ex: Throwable =>
         tensorManager.destructTFTensors()
@@ -453,8 +439,6 @@ object TFNet {
 
   assert(TFNetNative.isLoaded)
 
-  @transient
-  private lazy val inDriver = NetUtils.isDriver
 
   private val graphRegistry = new RegistryMap[ClosableGraph]()
 
@@ -466,30 +450,6 @@ object TFNet {
     }
   }
 
-  def testMiniBatch(model: AbstractModule[Activity, Activity, Float],
-                    dataset: RDD[MiniBatch[Float]],
-                    vMethods: Array[ValidationMethod[Float]]
-                   ): Array[(ValidationResult, ValidationMethod[Float])] = {
-
-    val rdd = dataset
-    val modelBroad = ModelBroadcast[Float]().broadcast(rdd.sparkContext,
-      model)
-    val otherBroad = rdd.sparkContext.broadcast(vMethods)
-
-
-    rdd.mapPartitions(miniBatch => {
-      val localModel = modelBroad.value()
-      val localMethod = otherBroad.value.map(_.clone())
-      miniBatch.map(batch => {
-        val output = localModel.forward(batch.getInput())
-        localMethod.map(validation => {
-          validation(output, batch.getTarget())
-        })
-      })
-    }).reduce((left, right) => {
-      left.zip(right).map { case (l, r) => l + r }
-    }).zip(vMethods)
-  }
 
   class TFGraphHolder(@transient var tfGraph: ClosableGraph, private var id: String)
     extends SerializationHolder {
@@ -502,14 +462,6 @@ object TFNet {
       }
       val len = graphDef.length
       out.writeString(id)
-      if (inDriver) {
-        out.writeInt(len)
-        timing(s"writing ${len / 1024 / 1024}Mb graph def to stream") {
-          out.write(graphDef)
-        }
-      } else {
-        out.writeInt(0)
-      }
     }
 
     override def readInternal(in: CommonInputStream): Unit = {
@@ -593,7 +545,7 @@ object TFNet {
    * @param graphDef the tensorflow GraphDef object
    * @return
    */
-  private[zoo] def apply(graphDef: GraphDef, graphId: String,
+  private def apply(graphDef: GraphDef, graphId: String,
                          graphMeta: Meta,
                          config: Array[Byte]): TFNet = {
     val graph = new Graph()
@@ -701,7 +653,7 @@ object TFNet {
       defaultSessionConfig.toByteArray())
   }
 
-  private[zoo] def parseGraph(graphProtoTxt: String): GraphDef = {
+  private def parseGraph(graphProtoTxt: String): GraphDef = {
     var fr: File = null
     var in: InputStream = null
     try {

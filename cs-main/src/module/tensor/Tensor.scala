@@ -19,10 +19,9 @@ package module.tensor
 import java.io.Serializable
 
 import com.intel.analytics.bigdl.mkl.MKL
-import com.intel.analytics.bigdl.nn.abstractnn.Activity
-import com.intel.analytics.bigdl.tensor.TensorNumericMath.TensorNumeric
-import com.intel.analytics.bigdl.utils.{File, Table}
-import module.tensor.storage.ArrayStorage
+import module.Activity
+import module.tensor.TensorNumericMath.TensorNumeric
+import module.tensor.storage.{ArrayStorage, Storage}
 import org.apache.spark.mllib.linalg.{DenseMatrix, DenseVector, Matrix, Vector}
 
 import scala.collection.mutable
@@ -662,12 +661,6 @@ trait Tensor[T] extends Serializable with TensorMath[T] with Activity {
    */
   def split(dim: Int) : Array[Tensor[T]]
 
-  /**
-   * convert the tensor to BreezeVector, the dimension of the tensor need to be 1.
-   *
-   * @return BrzDenseVector
-   */
-  def toBreezeVector(): BrzDenseVector[T]
 
   /**
    * convert the tensor to MLlibVector, the dimension of the
@@ -677,12 +670,6 @@ trait Tensor[T] extends Serializable with TensorMath[T] with Activity {
    */
   def toMLlibVector(): Vector
 
-  /**
-   * convert the tensor to BreezeMatrix, the dimension of the tensor need to be 2.
-   *
-   * @return BrzDenseMatrix
-   */
-  def toBreezeMatrix(): BrzDenseMatrix[T]
 
   /**
    * convert the tensor to MLlibMatrix, the dimension of the
@@ -721,7 +708,7 @@ trait Tensor[T] extends Serializable with TensorMath[T] with Activity {
    * view this.tensor and add multiple Dimensions to `dim` dimension
    *
    * @param t source tensor
-   * @param dim the specific dimension array, default is [1]
+   * @param dims the specific dimension array, default is [1]
    * @return this
    */
   def addMultiDimension(t: Tensor[T] = this, dims: Array[Int] = Array(1)): Tensor[T]
@@ -813,8 +800,6 @@ trait Tensor[T] extends Serializable with TensorMath[T] with Activity {
     }
     return false
   }
-
-  private[bigdl] def toQuantizedTensor: QuantizedTensor[T]
 }
 
 /**
@@ -1037,19 +1022,6 @@ object Tensor {
     implicit ev: TensorNumeric[T]): Tensor[T] = new DenseTensor(other)
 
   /**
-   * create a tensor with a given breeze vector. The tensor will have the same size
-   * with the given breeze vector.
-   *
-   * @param vector the given breeze vector
-   * @param ev
-   * @tparam T
-   * @return
-   */
-  def apply[@specialized(Float, Double) T: ClassTag](vector: BrzDenseVector[T])(
-    implicit ev: TensorNumeric[T]): Tensor[T] = apply(Storage(vector.data),
-    vector.offset + 1, Array(vector.length), Array(vector.stride))
-
-  /**
    * create a tensor with a given spark Densevector. The tensor will have the same size
    * with the given spark Densevector.
    *
@@ -1058,20 +1030,6 @@ object Tensor {
    */
   def apply(vector: DenseVector): Tensor[Double] =
     apply[Double](Storage(vector.toArray))
-
-  /**
-   * create a tensor with a given breeze matrix. The tensor will have the same size with
-   * the given breeze matrix.
-   *
-   * @param matrix the given breeze matrix
-   * @param ev
-   * @tparam T
-   * @return
-   */
-  def apply[@specialized(Float, Double) T: ClassTag](matrix: BrzDenseMatrix[T])(
-    implicit ev: TensorNumeric[T]): Tensor[T] = apply(Storage(matrix.data),
-    matrix.offset + 1, Array(matrix.rows, matrix.cols),
-    if (matrix.isTranspose) Array(matrix.majorStride, 1) else Array(1, matrix.majorStride))
 
   /**
    * create a tensor with a given spark Densematrix. The tensor will have the same size with
@@ -1140,10 +1098,6 @@ object Tensor {
    */
   def repeatTensor[T](tensor: Tensor[T], sizes: Int*): Tensor[T] =
     tensor.repeatTensor(sizes.toArray)
-
-  def load[T](path : String) : Tensor[T] = {
-    File.load[Tensor[T]](path)
-  }
 
   /**
    * This is equivalent to DenseTensor.range(xmin, xmax, step)
@@ -1325,7 +1279,7 @@ object Tensor {
    * @tparam T
    * @return
    */
-  private[bigdl] def sparseConcat[T: ClassTag](
+  private def sparseConcat[T: ClassTag](
                                                 dim: Int,
                                                 tensors: Table,
                                                 res: Tensor[T])(implicit ev: TensorNumeric[T]): Tensor[T] = {
@@ -1338,7 +1292,7 @@ object Tensor {
     SparseTensor.concat(dim, seqTensors, res)
   }
 
-  private[bigdl] def sparseConcat[T: ClassTag](
+  private def sparseConcat[T: ClassTag](
                                                 dim: Int,
                                                 tensors: Seq[Tensor[T]],
                                                 res: Tensor[T])(implicit ev: TensorNumeric[T]): Tensor[T] = {

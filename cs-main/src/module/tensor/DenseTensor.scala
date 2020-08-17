@@ -19,11 +19,9 @@ package module.tensor
 import java.util.Comparator
 
 import com.intel.analytics.bigdl.mkl.MKL
-import com.intel.analytics.bigdl.tensor.TensorNumericMath.TensorNumeric
-import com.intel.analytics.bigdl.utils.RandomGenerator._
-import com.intel.analytics.bigdl.utils.{File, Table}
+import module.tensor.TensorNumericMath.TensorNumeric
 import module.tensor.storage.{ArrayStorage, Storage}
-import org.apache.spark.mllib.linalg.{DenseMatrix, DenseVector, Matrix, Vector}
+import module.utils.RandomGenerator._
 
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag
@@ -428,9 +426,6 @@ private[tensor] class DenseTensor[@specialized T: ClassTag](
 
   override def copy(other: Tensor[T]): Tensor[T] = {
     other match {
-      case t: DnnTensor[_] =>
-        require(this.nElement() == other.nElement(), "tensor size must match")
-        this.storage().copy(other.storage(), this.storageOffset() - 1, 0, other.nElement())
       case t: DenseTensor[_] =>
         DenseTensor.copy(this, other)
       case _ => throw new UnsupportedOperationException(
@@ -1411,35 +1406,10 @@ private[tensor] class DenseTensor[@specialized T: ClassTag](
 
   override def abs(): Tensor[T] = this.apply1(ev.abs(_))
 
-  override def toBreezeVector(): BrzDenseVector[T] = {
-    require(this.nDimension == 1, "tensor is not 1D")
-    new BrzDenseVector(this.storage().array(), this.storageOffset() - 1, this.stride(1),
-      this.nElement())
-  }
 
   override def getType(): TensorDataType = ev.getType()
 
-  override def toMLlibMatrix(): Matrix = {
-    require(this.nDimension == 2, "tensor is not 2D")
-    require((this.stride(1) == 1 && this.stride(2) == this.size(1))
-      || (this.stride(1) == this.size(2) && this.stride(2) == 1), "tensor is not continuous")
-    new DenseMatrix(this.size(1), this.size(2), this.storage().array().asInstanceOf[Array[Double]],
-      this.stride(2) == 1) // column major
-  }
 
-  override def toBreezeMatrix(): BrzDenseMatrix[T] = {
-    require(this.nDimension == 2, "tensor is not 2D")
-    val majorStride = if (this.stride(2) == 1) this.stride(1) else this.stride(2)
-    new BrzDenseMatrix[T](this.size(1), this.size(2), this.storage().array(),
-      this.storageOffset() - 1,
-      majorStride, this.stride(2) == 1)
-  }
-
-  override def toMLlibVector(): Vector = {
-    require(this.nDimension == 1, "tensor is not 1D")
-    require(this.stride(1) == 1, "tensor is not continuous")
-    new DenseVector(this.storage().array().asInstanceOf[Array[Double]])
-  }
 
   override def equals(obj: Any): Boolean = {
     if (obj == null) {
@@ -1824,10 +1794,6 @@ private[tensor] class DenseTensor[@specialized T: ClassTag](
     this
   }
 
-  override def save(path: String, overWrite: Boolean): this.type = {
-    File.save(this, path, overWrite)
-    this
-  }
 
   /**
    * Fills the masked elements of itself with value val
@@ -2299,8 +2265,6 @@ private[tensor] class DenseTensor[@specialized T: ClassTag](
     this.apply1(a => ev.digamma(a))
   }
 
-  override private[bigdl] def toQuantizedTensor: QuantizedTensor[T] =
-    throw new IllegalArgumentException("DenseTensor cannot be cast to QuantizedTensor")
 }
 
 object DenseTensor {

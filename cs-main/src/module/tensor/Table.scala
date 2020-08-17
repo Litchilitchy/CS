@@ -17,6 +17,7 @@
 package module.tensor
 
 import module.Activity
+import module.tensor.TensorNumericMath.TensorNumeric
 
 import scala.collection.immutable.{Map => ImmutableMap}
 import scala.collection.mutable.Map
@@ -28,13 +29,12 @@ import scala.collection.{Set, mutable}
  * @param state
  * @param topIndex
  */
-class Table private(
-                            private val state: Map[Any, Any] = new mutable.HashMap[Any, Any](),
-                            // index of last element in the contiguous numeric number indexed elements start from 1
-                            private var topIndex: Int = 0
-                          ) extends Serializable with Activity {
+class Table (private val state: Map[Any, Any] = new mutable.HashMap[Any, Any](),
+              // index of last element in the contiguous numeric number indexed elements start from 1
+              private var topIndex: Int = 0
+            ) extends Serializable with Activity {
 
-  private def this(data: Array[Any]) = {
+  def this(data: Array[Any]) = {
     this(new mutable.HashMap[Any, Any](), 0)
     while (topIndex < data.length) {
       state.put(topIndex + 1, data(topIndex))
@@ -218,11 +218,6 @@ class Table private(
   }
 
   def length(): Int = state.size
-
-  def save(path : String, overWrite : Boolean): this.type = {
-    File.save(this, path, overWrite)
-    this
-  }
 
   /**
    * Recursively flatten the table to a single table containing no nested table inside

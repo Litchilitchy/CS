@@ -16,16 +16,23 @@
 
 package serving.utils
 
-import module.AbstractModule
-import module.Activity
-import org.apache.arrow.vector.types.FloatingPointPrecision
-import org.apache.arrow.vector.types.pojo.ArrowType
+import java.io.PrintWriter
+import org.apache.flink.core.execution.JobClient
 
-object Conventions {
-  type Model = AbstractModule[Activity, Activity, Float]
-  val SERVING_STREAM_NAME = "serving_stream"
-  val ARROW_INT = new ArrowType.Int(32, true)
-  val ARROW_FLOAT = new ArrowType.FloatingPoint(FloatingPointPrecision.SINGLE)
-  val ARROW_BINARY = new ArrowType.Binary()
-  val ARROW_UTF8 = new ArrowType.Utf8
+object ClusterServingManager {
+
+  def writeObjectToFile(cli: JobClient): Unit = {
+    try {
+      new PrintWriter("/tmp/cluster-serving-job-id") {
+        write(cli.getJobID.toHexString)
+        close
+      }
+      println("Cluster Serving Flink job id written to file.")
+    }
+    catch {
+      case e: Exception =>
+        e.printStackTrace()
+        println("Failed to write job id written to file. You may not manager job by id now.")
+    }
+  }
 }

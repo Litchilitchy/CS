@@ -18,6 +18,7 @@ package serving.pipeline
 
 import org.apache.log4j.Logger
 import redis.clients.jedis.Jedis
+import serving.utils.Conventions
 
 object RedisUtils {
   def checkMemory(db: Jedis, inputThreshold: Double, cutRatio: Double): Unit = {

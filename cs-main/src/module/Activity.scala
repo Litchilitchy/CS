@@ -75,10 +75,7 @@ object Activity {
       } else if (classTag[String] == classTag[T]) {
         import com.intel.analytics.bigdl.numeric.NumericString
         Tensor[String]()
-      } else if (classTag[ByteString] == classTag[T]) {
-        import com.intel.analytics.bigdl.utils.tf.TFTensorNumeric.NumericByteString
-        Tensor[ByteString]()
-      } else {
+      }else {
         throw new IllegalArgumentException("Type T activity is not supported")
       }
     } else {
@@ -87,5 +84,4 @@ object Activity {
     buffer.asInstanceOf[D]
   }
 
-  def emptyGradInput(name: String): EmptyGradInput = new EmptyGradInput(name)
 }

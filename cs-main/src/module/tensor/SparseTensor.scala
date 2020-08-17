@@ -17,10 +17,8 @@
 package module.tensor
 
 import breeze.linalg.{DenseMatrix, DenseVector}
-import com.intel.analytics.bigdl.tensor.TensorNumericMath.TensorNumeric
-import com.intel.analytics.bigdl.utils.Table
+import module.tensor.TensorNumericMath.TensorNumeric
 import module.tensor.storage.Storage
-import org.apache.spark.mllib.linalg.{Matrix, Vector}
 
 import scala.reflect.ClassTag
 
@@ -415,22 +413,6 @@ private[tensor] class SparseTensor[@specialized(Float, Double) T: ClassTag](
   }
 
   override def split(dim: Int): Array[Tensor[T]] = {
-    throw new UnsupportedOperationException(s"SparseTensor: Unimplemented method")
-  }
-
-  override def toBreezeVector(): DenseVector[T] = {
-    throw new UnsupportedOperationException(s"SparseTensor: Unimplemented method")
-  }
-
-  override def toMLlibVector(): Vector = {
-    throw new UnsupportedOperationException(s"SparseTensor: Unimplemented method")
-  }
-
-  override def toBreezeMatrix(): DenseMatrix[T] = {
-    throw new UnsupportedOperationException(s"SparseTensor: Unimplemented method")
-  }
-
-  override def toMLlibMatrix(): Matrix = {
     throw new UnsupportedOperationException(s"SparseTensor: Unimplemented method")
   }
 
@@ -1132,8 +1114,6 @@ private[tensor] class SparseTensor[@specialized(Float, Double) T: ClassTag](
   override def sumSquare(): T =
     throw new UnsupportedOperationException(s"SparseTensor: Unimplemented method")
 
-  override private[bigdl] def toQuantizedTensor: QuantizedTensor[T] =
-    throw new IllegalArgumentException("SparseTensor cannot be cast to QuantizedTensor")
 }
 
 object SparseTensor{
