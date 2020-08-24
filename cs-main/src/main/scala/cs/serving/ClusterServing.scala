@@ -18,7 +18,7 @@
 package cs.serving
 
 import cs.serving.engine.{FlinkInference, FlinkRedisSink, FlinkRedisSource}
-import cs.serving.utils.{ClusterServingHelper, ClusterServingManager, SerParams}
+import cs.serving.utils.{ClusterServingHelper, ClusterServingManager, Conventions, SerParams}
 import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, _}
 import org.apache.log4j.{Level, Logger}
 import scopt.OptionParser
@@ -36,7 +36,7 @@ object ClusterServing {
   }
 
   Logger.getLogger("org").setLevel(Level.ERROR)
-  Logger.getLogger("com.intel.analytics.zoo").setLevel(Level.INFO)
+  Logger.getLogger("cs").setLevel(Level.INFO)
   var params: SerParams = null
   val logger = Logger.getLogger(getClass)
   def run(configPath: String = "config.yaml", testMode: Boolean = false): Unit = {
@@ -44,7 +44,7 @@ object ClusterServing {
     helper.initArgs()
     params = new SerParams(helper)
     val serving = StreamExecutionEnvironment.getExecutionEnvironment
-
+    serving.registerCachedFile(params.modelDir, Conventions.SERVING_MODEL_TMP_DIR)
     if (testMode) {
       println("Running Cluster Serving in test mode with parallelism 1")
       serving.addSource(new FlinkRedisSource(params)).setParallelism(1)

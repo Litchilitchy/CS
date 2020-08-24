@@ -30,8 +30,11 @@ object InferenceSupportive {
     val postProcessed = preProcessed.map(pathByte => {
       try {
         val t = typeCheck(pathByte._2)
-        val result = params.model.forward(t)
-        val value = PostProcessing(result.toTensor[Float], params.filter, 1)
+        val result = timing(){
+          params.model.forward(t)
+        }
+
+        val value = PostProcessing(result, params.filter, 1)
         (pathByte._1, value)
       } catch {
         case e: Exception =>
@@ -43,7 +46,6 @@ object InferenceSupportive {
   }
   def multiThreadInference(preProcessed: Iterator[(String, Activity)],
                            params: SerParams): Iterator[(String, String)] = {
-    println("Inference new batch ..................")
     val postProcessed = preProcessed.grouped(params.coreNum).flatMap(pathByteBatch => {
       try {
         val thisBatchSize = pathByteBatch.size
@@ -157,5 +159,13 @@ object InferenceSupportive {
       logger.error("Your input of Inference is neither Table nor Tensor, please check.")
       throw new Error("Your input is invalid, skipped.")
     }
+  }
+  protected def timing[T]()(f: => T): T = {
+    val begin = System.currentTimeMillis
+    val result = f
+    val end = System.currentTimeMillis
+    val cost = end - begin
+    logger.info(s"Predict time elapsed [${cost / 1000} s, ${cost % 1000} ms].")
+    result
   }
 }

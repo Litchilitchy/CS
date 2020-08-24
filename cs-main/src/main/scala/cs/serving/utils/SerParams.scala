@@ -16,24 +16,17 @@
 
 package cs.serving.utils
 
-import java.text.SimpleDateFormat
-
 import cs.serving.utils.Conventions.Model
 
-class SerParams(helper: ClusterServingHelper, loadModel: Boolean = true) extends Serializable {
+class SerParams(helper: ClusterServingHelper) extends Serializable {
   var redisHost = helper.redisHost
   var redisPort = helper.redisPort.toInt
   val coreNum = helper.coreNum
   val filter = helper.filter
   val chwFlag = helper.chwFlag
   val inferenceMode = helper.inferenceMode
-//  val dataShape = helper.dataShape
   val modelType = helper.modelType
   val modelDir = helper.modelDir
-  val sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
-  val redisSecureEnabled = helper.redisSecureEnabled
-  val redisSecureTrustStorePath = helper.redisSecureTrustStorePath
-  val redisSecureTrustStorePassword = helper.redisSecureTrustStorePassword
   var model: Model = null
   val resize = helper.resize
 }

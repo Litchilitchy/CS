@@ -25,21 +25,16 @@ import org.apache.log4j.Logger
 import org.yaml.snakeyaml.Yaml
 import cs.serving.utils.Conventions.Model
 
-class ClusterServingHelper(_configPath: String = "config.yaml") {
+class ClusterServingHelper(_configPath: String = "config.yaml", _modelDir: String = null) {
   type HM = LinkedHashMap[String, String]
+  val logger: Logger = Logger.getLogger(getClass)
 
   val configPath = _configPath
-
-  var lastModTime: String = null
-  val logger: Logger = Logger.getLogger(getClass)
   var inferenceMode: String = null
-
   var redisHost: String = null
   var redisPort: String = null
   var nodeNum: Int = 1
   var coreNum: Int = 1
-  var engineType: String = null
-  var blasFlag: Boolean = false
   var chwFlag: Boolean = true
   var filter: String = null
   var resize: Boolean = false
@@ -50,13 +45,7 @@ class ClusterServingHelper(_configPath: String = "config.yaml") {
   var modelType: String = null
   var weightPath: String = null
   var defPath: String = null
-  var modelDir: String = null
-  /**
-   * secure related
-   */
-  var redisSecureEnabled: Boolean = true
-  var redisSecureTrustStorePath: String = null
-  var redisSecureTrustStorePassword: String = null
+  var modelDir = _modelDir
   /**
    * Initialize the parameters by loading config file
    * create log file, set backend engine type flag
@@ -70,9 +59,11 @@ class ClusterServingHelper(_configPath: String = "config.yaml") {
 
     // parse model field
     val modelConfig = configList.get("model").asInstanceOf[HM]
-    modelDir = getYaml(modelConfig, "path", null).asInstanceOf[String]
+    if (modelDir == null) {
+      modelDir = getYaml(modelConfig, "path", null).asInstanceOf[String]
+    }
     inferenceMode = getYaml(modelConfig, "mode", "").asInstanceOf[String]
-    parseModelType(modelDir)
+    parseModelType()
 
     /**
      * reserved here to change engine type
@@ -92,25 +83,6 @@ class ClusterServingHelper(_configPath: String = "config.yaml") {
       "and port are not valid, please check.")
     redisHost = redis.split(":").head.trim
     redisPort = redis.split(":").last.trim
-
-    val secureConfig = configList.get("secure").asInstanceOf[HM]
-    redisSecureEnabled = getYaml(secureConfig, "secure_enabled", false).asInstanceOf[Boolean]
-
-    val defaultPath = try {
-      getClass.getClassLoader.getResource("keys/keystore.jks").getPath
-    } catch {
-      case _ => ""
-    }
-    redisSecureTrustStorePath = getYaml(
-      secureConfig, "secure_trust_store_path", defaultPath)
-      .asInstanceOf[String]
-    redisSecureTrustStorePassword = getYaml(
-      secureConfig, "secure_struct_store_password", "1234qwer").asInstanceOf[String]
-
-    val shapeStr = getYaml(dataConfig, "shape", "3,224,224").asInstanceOf[String]
-    require(shapeStr != null, "data shape in config must be specified.")
-    val typeStr = getYaml(dataConfig, "type", "image")
-    require(typeStr != null, "data type in config must be specified.")
 
     filter = getYaml(dataConfig, "filter", "").asInstanceOf[String]
     resize = getYaml(dataConfig, "resize", true).asInstanceOf[Boolean]
@@ -181,18 +153,17 @@ class ClusterServingHelper(_configPath: String = "config.yaml") {
    * Infer the model type in model directory
    * Try every file in the directory, infer which are the
    * model definition file and model weight file
-   * @param location
    */
-  def parseModelType(location: String): Unit = {
+  def parseModelType(): Unit = {
     /**
      * Download file to local if the scheme is remote
      * Currently support hdfs, s3
      */
-    val scheme = location.split(":").head
-    val localModelPath = if (scheme == "file" || location.split(":").length <= 1) {
-      location.split("file://").last
+    val scheme = modelDir.split(":").head
+    val localModelPath = if (scheme == "file" || modelDir.split(":").length <= 1) {
+      modelDir.split("file://").last
     } else {
-      location
+      modelDir
     }
 
     /**

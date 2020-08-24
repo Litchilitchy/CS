@@ -40,20 +40,8 @@ class FlinkRedisSource(params: SerParams)
   override def open(parameters: Configuration): Unit = {
     logger = Logger.getLogger(getClass)
 
-    if (params.redisSecureEnabled) {
-      System.setProperty("javax.net.ssl.trustStore", params.redisSecureTrustStorePath)
-      System.setProperty("javax.net.ssl.trustStorePassword", params.redisSecureTrustStorePassword)
-      System.setProperty("javax.net.ssl.keyStoreType", "JKS")
-      System.setProperty("javax.net.ssl.keyStore", params.redisSecureTrustStorePath)
-      System.setProperty("javax.net.ssl.keyStorePassword", params.redisSecureTrustStorePassword)
-    }
-
     redisPool = new JedisPool(new JedisPoolConfig(),
-      params.redisHost, params.redisPort, 5000, params.redisSecureEnabled)
-    params.redisSecureEnabled match {
-      case true => logger.info(s"FlinkRedisSource connect to secured Redis successfully.")
-      case false => logger.info(s"FlinkRedisSource connect to plain Redis successfully.")
-    }
+      params.redisHost, params.redisPort, 5000)
     jedis = RedisIO.getRedisClient(redisPool)
     try {
       jedis.xgroupCreate(Conventions.SERVING_STREAM_NAME, "cs/serving", new StreamEntryID(0, 0), true)

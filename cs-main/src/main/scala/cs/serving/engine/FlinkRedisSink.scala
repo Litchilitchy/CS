@@ -33,22 +33,9 @@ class FlinkRedisSink(params: SerParams) extends RichSinkFunction[List[(String, S
   override def open(parameters: Configuration): Unit = {
     logger = Logger.getLogger(getClass)
 
-    if (params.redisSecureEnabled) {
-      System.setProperty("javax.net.ssl.trustStore", params.redisSecureTrustStorePath)
-      System.setProperty("javax.net.ssl.trustStorePassword", params.redisSecureTrustStorePassword)
-      System.setProperty("javax.net.ssl.keyStoreType", "JKS")
-      System.setProperty("javax.net.ssl.keyStore", params.redisSecureTrustStorePath)
-      System.setProperty("javax.net.ssl.keyStorePassword", params.redisSecureTrustStorePassword)
-    }
-
     redisPool = new JedisPool(new JedisPoolConfig(),
-      params.redisHost, params.redisPort, params.redisSecureEnabled)
-    params.redisSecureEnabled match {
-      case true => logger.info(s"FlinkRedisSink connect to secured Redis successfully.")
-      case false => logger.info(s"FlinkRedisSink connect to plain Redis successfully.")
-    }
+      params.redisHost, params.redisPort)
     jedis = RedisIO.getRedisClient(redisPool)
-
   }
 
   override def close(): Unit = {
@@ -56,7 +43,6 @@ class FlinkRedisSink(params: SerParams) extends RichSinkFunction[List[(String, S
       redisPool.close()
     }
   }
-
 
   override def invoke(value: List[(String, String)]): Unit = {
 //    logger.info(s"Preparing to write result to redis")

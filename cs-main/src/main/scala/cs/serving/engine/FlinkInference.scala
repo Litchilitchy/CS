@@ -22,9 +22,9 @@ import org.apache.flink.configuration.Configuration
 import org.apache.log4j.Logger
 import cs.serving.postprocessing.PostProcessing
 import cs.serving.preprocessing.PreProcessing
-import cs.serving.utils.{ClusterServingHelper, SerParams}
-
-
+import cs.serving.utils.Conventions.Model
+import cs.serving.utils.{ClusterServingHelper, Conventions, SerParams}
+//KMP_AFFINITY=verbose,granularity=fine,proclist=[0,1,2,3,4,5]
 class FlinkInference(params: SerParams)
   extends RichMapFunction[List[(String, String)], List[(String, String)]] {
   var t: Tensor[Float] = null
@@ -34,31 +34,33 @@ class FlinkInference(params: SerParams)
 
   override def open(parameters: Configuration): Unit = {
     logger = Logger.getLogger(getClass)
-    pre = new PreProcessing(params)
-    val helper = new ClusterServingHelper()
-    helper.initArgs()
+    val localModelDir = getRuntimeContext.getDistributedCache
+      .getFile(Conventions.SERVING_MODEL_TMP_DIR).getPath
+    logger.info(s"Model loaded at executor at path ${localModelDir}")
+    val helper = new ClusterServingHelper(_modelDir = localModelDir)
+    helper.parseModelType()
     params.model = helper.loadModel()
-    pre
+
+    pre = new PreProcessing(params)
+
   }
 
   override def map(in: List[(String, String)]): List[(String, String)] = {
     val t1 = System.nanoTime()
+    val preProcessed = in.map(item => {
+      val uri = item._1
+      val input = pre.decodeArrowBase64(item._2)
+      (uri, input)
 
-    val preProcessed = in.grouped(params.coreNum).flatMap(itemBatch => {
-      itemBatch.indices.toParArray.map(i => {
-        val uri = itemBatch(i)._1
-        val input = pre.decodeArrowBase64(itemBatch(i)._2)
-        (uri, input)
-      })
-    })
-    val postProcessed = if (params.inferenceMode == "single") {
+    }).toIterator
+    val postProcessed =
       InferenceSupportive.singleThreadInference(preProcessed, params).toList
-    } else {
-      InferenceSupportive.multiThreadInference(preProcessed, params).toList
-    }
     val t2 = System.nanoTime()
     logger.info(s"${postProcessed.size} records backend time ${(t2 - t1) / 1e9} s. " +
       s"Throughput ${postProcessed.size / ((t2 - t1) / 1e9)}")
     postProcessed
   }
+}
+object FlinkInference {
+  var model: Model = null
 }

@@ -24,6 +24,8 @@ import org.apache.arrow.vector.types.pojo.ArrowType
 object Conventions {
   type Model = AbstractModule[Activity, Activity, Float]
   val SERVING_STREAM_NAME = "serving_stream"
+  val SERVING_MODEL_TMP_DIR = "cluster-serving-model"
+  val SERVING_CONF_TMP_PATH = "cluster-serving-conf.yaml"
   val ARROW_INT = new ArrowType.Int(32, true)
   val ARROW_FLOAT = new ArrowType.FloatingPoint(FloatingPointPrecision.SINGLE)
   val ARROW_BINARY = new ArrowType.Binary()

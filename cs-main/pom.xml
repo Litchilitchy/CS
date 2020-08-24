@@ -44,48 +44,6 @@
     <profiles>
 
         <profile>
-            <id>spark_1.6</id>
-            <properties>
-                <spark-version.project>1.6-plus</spark-version.project>
-                <spark.version>1.6.3</spark.version>
-                <scala.major.version>2.10</scala.major.version>
-                <scala.version>2.10.5</scala.version>
-                <scala.macros.version>2.0.1</scala.macros.version>
-                <scalatest.version>2.2.4</scalatest.version>
-                <bigdl.artifactId>bigdl-SPARK_1.6</bigdl.artifactId>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>spark_2.x</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>net.alchim31.maven</groupId>
-                        <artifactId>scala-maven-plugin</artifactId>
-                        <configuration>
-                            <excludes>
-                                <exclude>**/com/intel/analytics/zoo/serving/**</exclude>
-                                <exclude>**/com/intel/analytics/zoo/pipeline/nnframes/XgboostTrainSpec.scala</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-            <properties>
-                <java.version>1.8</java.version>
-                <javac.version>1.8</javac.version>
-                <spark-version.project>2.1</spark-version.project>
-                <spark.version>2.1.0</spark.version>
-                <scala.major.version>2.11</scala.major.version>
-                <scala.version>2.11.8</scala.version>
-                <scala.macros.version>2.1.0</scala.macros.version>
-                <bigdl.artifactId>bigdl-SPARK_${spark-version.project}</bigdl.artifactId>
-
-            </properties>
-        </profile>
-
-        <profile>
             <id>spark_2.4+</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -121,14 +79,6 @@
                     <version>1.7.5</version>
                 </dependency>
             </dependencies>
-        </profile>
-
-        <profile>
-            <id>without_bigdl</id>
-            <properties>
-                <bigdl-scope>provided</bigdl-scope>
-                <tf-shade>org.tensorflow</tf-shade>
-            </properties>
         </profile>
 
         <profile>
@@ -252,6 +202,11 @@
     </licenses>
 
     <dependencies>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_${scala.major.version}</artifactId>
